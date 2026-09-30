@@ -5,6 +5,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MAX_INPUT_BYTES = 2_000_000;
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -39,7 +40,7 @@ const maxFindings = Number(valueAfter('--max-findings') || 40);
 const raw = await readTarget(target);
 const content = looksLikeHtml(raw) ? htmlToText(raw) : raw;
 const rules = await loadRules();
-const report = audit(content, rules, { target, maxFindings });
+const report = audit(content, raw, rules, { target, maxFindings });
 
 if (format === 'json') {
   console.log(JSON.stringify(report, null, 2));
@@ -57,15 +58,29 @@ function valueAfter(flag) {
 async function readTarget(target) {
   if (target === '-') {
     let text = '';
-    for await (const chunk of process.stdin) text += chunk;
+    for await (const chunk of process.stdin) {
+      text += chunk;
+      if (Buffer.byteLength(text, 'utf8') > MAX_INPUT_BYTES) throw new Error('Input exceeds 2 MB safety limit.');
+    }
     return text;
   }
   if (/^https?:\/\//i.test(target)) {
-    const res = await fetch(target, { redirect: 'follow', headers: { 'user-agent': 'the-extractor/0.1' } });
+    const res = await fetch(target, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+      headers: { 'user-agent': 'the-extractor/0.1' }
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${target}`);
-    return await res.text();
+    const declared = Number(res.headers.get('content-length') || 0);
+    if (declared > MAX_INPUT_BYTES) throw new Error('Remote input exceeds 2 MB safety limit.');
+    const text = await res.text();
+    if (Buffer.byteLength(text, 'utf8') > MAX_INPUT_BYTES) throw new Error('Remote input exceeds 2 MB safety limit.');
+    return text;
   }
-  return await fs.readFile(path.resolve(target), 'utf8');
+  const file = path.resolve(target);
+  const stat = await fs.stat(file);
+  if (stat.size > MAX_INPUT_BYTES) throw new Error('File exceeds 2 MB safety limit.');
+  return await fs.readFile(file, 'utf8');
 }
 
 async function loadRules() {
@@ -76,25 +91,27 @@ async function loadRules() {
   return [...JSON.parse(copy), ...JSON.parse(ui)];
 }
 
-function audit(content, rules, { target, maxFindings }) {
+function audit(content, rawSource, rules, { target, maxFindings }) {
   const normalized = content.replace(/\r\n/g, '\n');
+  const sourceNormalized = rawSource.replace(/\r\n/g, '\n');
   const findings = [];
 
   for (const rule of rules) {
+    const haystack = ['ui', 'motion', 'code'].includes(rule.category) ? sourceNormalized : normalized;
     const rx = new RegExp(rule.pattern, rule.flags || 'gi');
     let match;
     let count = 0;
-    while ((match = rx.exec(normalized)) && findings.length < maxFindings) {
+    while ((match = rx.exec(haystack)) && findings.length < maxFindings) {
       count++;
       const start = Math.max(0, match.index - 60);
-      const end = Math.min(normalized.length, match.index + match[0].length + 90);
+      const end = Math.min(haystack.length, match.index + match[0].length + 90);
       if (count === 1) {
         findings.push({
           id: rule.id,
           category: rule.category,
           severity: rule.severity,
           label: rule.label,
-          evidence: oneLine(normalized.slice(start, end)),
+          evidence: oneLine(haystack.slice(start, end)),
           occurrences: 1,
           why: rule.why,
           action: rule.action

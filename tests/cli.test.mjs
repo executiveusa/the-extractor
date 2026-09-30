@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawnSync, execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const cli = path.join(root, 'extractor.mjs');
@@ -28,4 +30,14 @@ test('clean fixture is materially quieter', () => {
 test('strict mode fails on high severity', () => {
   const r = run('tests/fixtures/slop.txt', ['--strict']);
   assert.equal(r.status, 1);
+});
+
+
+test('UI source rules survive HTML text extraction', () => {
+  const file = path.join(tmpdir(), `extractor-ui-${Date.now()}.html`);
+  writeFileSync(file, '<!doctype html><html><body><section class="rounded-3xl bg-gradient-to-r">Specific copy.</section></body></html>');
+  const out = execFileSync(process.execPath, [cli, 'audit', file, '--format', 'json'], { encoding: 'utf8' });
+  const report = JSON.parse(out);
+  assert.ok(report.findings.some(f => f.id === 'X-U01'));
+  assert.ok(report.findings.some(f => f.id === 'X-U02'));
 });
