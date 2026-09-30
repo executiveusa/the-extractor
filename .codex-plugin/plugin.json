@@ -1,0 +1,24 @@
+{
+  "name": "the-extractor",
+  "version": "0.1.0",
+  "description": "Destruction-first anti-slop audits for copy, interfaces and agent output.",
+  "author": {
+    "name": "executiveusa"
+  },
+  "homepage": "https://github.com/executiveusa/the-extractor",
+  "repository": "https://github.com/executiveusa/the-extractor",
+  "license": "MIT",
+  "keywords": ["anti-slop", "humanizer", "reduction", "copywriting", "ui-audit"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "The Extractor",
+    "shortDescription": "Delete what did not earn its place.",
+    "longDescription": "A destruction-first audit workflow for existing copy, websites, interfaces and agent output. It freezes the source, defines the human task, flags slop signals, deletes before rewriting, humanizes only what survives, and stops when another removal would hurt the user.",
+    "developerName": "executiveusa",
+    "category": "Productivity",
+    "brandColor": "#E74723",
+    "composerIcon": "./site/icon.svg",
+    "logo": "./site/icon.svg",
+    "screenshots": []
+  }
+}
