@@ -1,0 +1,43 @@
+name: Request a Deep Extraction Audit
+description: Request a human-reviewed anti-slop audit of one public page.
+title: "Audit request: "
+labels: ["audit-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates a public GitHub issue. Do not paste passwords, private client material, health data, customer data, or unpublished confidential information.
+  - type: input
+    id: url
+    attributes:
+      label: Public URL
+      description: The public page you want audited.
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: dropdown
+    id: focus
+    attributes:
+      label: Primary focus
+      options:
+        - Full page
+        - Copy
+        - UX / information architecture
+        - Visual/UI anti-patterns
+        - Offer / conversion path
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What should this page help a human do?
+      description: One or two sentences. Avoid private information.
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Public-source confirmation
+      options:
+        - label: I confirm the requested page is public and I have not included private or regulated data in this issue.
+          required: true

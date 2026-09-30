@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.mjs",
     "audit:fixture": "node extractor.mjs audit tests/fixtures/slop.txt",
     "audit:clean": "node extractor.mjs audit tests/fixtures/clean.txt",
-    "check": "node --check extractor.mjs && node --test tests/*.test.mjs"
+    "check": "node --check extractor.mjs && node --check action/index.mjs && node --check scripts/build-site.mjs && node --test tests/*.test.mjs && npm run build:site",
+    "build:site": "node scripts/build-site.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -88,15 +88,21 @@ function audit(content, rules, { target, maxFindings }) {
       count++;
       const start = Math.max(0, match.index - 60);
       const end = Math.min(normalized.length, match.index + match[0].length + 90);
-      findings.push({
-        id: rule.id,
-        category: rule.category,
-        severity: rule.severity,
-        label: rule.label,
-        evidence: oneLine(normalized.slice(start, end)),
-        why: rule.why,
-        action: rule.action
-      });
+      if (count === 1) {
+        findings.push({
+          id: rule.id,
+          category: rule.category,
+          severity: rule.severity,
+          label: rule.label,
+          evidence: oneLine(normalized.slice(start, end)),
+          occurrences: 1,
+          why: rule.why,
+          action: rule.action
+        });
+      } else {
+        const existing = findings.find(f => f.id === rule.id);
+        if (existing) existing.occurrences = count;
+      }
       if (!rx.global || count >= (rule.maxMatches || 4)) break;
     }
   }
@@ -166,7 +172,7 @@ function renderText(report) {
   lines.push('');
   for (const f of report.findings) {
     lines.push(`[${f.severity.toUpperCase()}] ${f.id} · ${f.label}`);
-    lines.push(`  Evidence: ${f.evidence}`);
+    lines.push(`  Evidence: ${f.evidence}${f.occurrences > 1 ? `  [${f.occurrences} matches]` : ''}`);
     lines.push(`  Why: ${f.why}`);
     lines.push(`  Action: ${f.action}`);
     lines.push('');
