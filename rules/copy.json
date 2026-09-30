@@ -1,0 +1,82 @@
+[
+  {
+    "id": "X-C01",
+    "category": "copy",
+    "severity": "high",
+    "label": "Generic elevation claim",
+    "pattern": "\\b(wellness|beauty|care|experience),?\\s+elevated\\b",
+    "why": "The phrase signals premium positioning without giving the reader a concrete reason to believe it.",
+    "action": "Delete it or replace it with a specific service, standard, credential, outcome boundary or proof point.",
+    "maxMatches": 3
+  },
+  {
+    "id": "X-C02",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Thoughtfully-designed filler",
+    "pattern": "\\bthoughtfully designed\\b",
+    "why": "This adjective phrase often describes intent rather than something the reader can verify.",
+    "action": "Show the actual design choice or delete the claim.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-C03",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Difference without evidence",
+    "pattern": "\\b(designed to feel different|a different kind of|feels? unlike)\\b",
+    "why": "Difference is asserted instead of demonstrated.",
+    "action": "Replace the claim with the observable difference, or remove it.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-C04",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Journey / experience staging",
+    "pattern": "\\b(your next experience starts here|begin your journey|transformative journey|curated journey)\\b",
+    "why": "Staging language delays the action and is portable across unrelated brands.",
+    "action": "State the next action directly.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-C05",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Portable premium adjective",
+    "pattern": "\\b(seamless|elevated|curated|transformative|cutting-edge|state-of-the-art|bespoke)\\b",
+    "why": "These words can be valid, but they are often used where a concrete noun or proof point would do more work.",
+    "action": "Ask what this word means here. Keep it only if the surrounding sentence proves it.",
+    "maxMatches": 6
+  },
+  {
+    "id": "X-C06",
+    "category": "copy",
+    "severity": "low",
+    "label": "Not-just / but construction",
+    "pattern": "\\bnot just\\b[\\s\\S]{0,90}\\bbut\\b",
+    "why": "This contrast frame is frequently overused in generated marketing copy.",
+    "action": "State the stronger clause directly unless the contrast genuinely changes meaning.",
+    "maxMatches": 3
+  },
+  {
+    "id": "X-C07",
+    "category": "trust",
+    "severity": "high",
+    "label": "Unanchored superlative",
+    "pattern": "\\b(best-in-class|world-class|industry-leading|unmatched|unparalleled|revolutionary)\\b",
+    "why": "A superlative without a comparison or source creates a trust debt.",
+    "action": "Add verifiable evidence or remove the claim.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-C08",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Generic CTA",
+    "pattern": "\\b(explore services|explore experience|discover crown & core|discover more|learn more|get started)\\b",
+    "why": "Generic CTA labels make the reader infer what happens after the click.",
+    "action": "Use the actual action: book, compare, see pricing, read treatment details, or request an audit.",
+    "maxMatches": 8
+  }
+]

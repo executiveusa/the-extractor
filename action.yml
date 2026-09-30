@@ -1,0 +1,17 @@
+name: The Extractor Anti-Slop Audit
+description: Flag copy and interface slop signals in text, Markdown or HTML before they ship.
+author: executiveusa
+branding:
+  icon: filter
+  color: orange
+inputs:
+  path:
+    description: File to audit
+    required: true
+  strict:
+    description: Fail when high-severity signals are found
+    required: false
+    default: "false"
+runs:
+  using: node20
+  main: action/index.mjs

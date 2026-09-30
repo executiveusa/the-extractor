@@ -1,0 +1,29 @@
+{
+  "name": "@the-extractor/core",
+  "version": "0.1.0",
+  "description": "Destruction-first anti-slop audits for copy, interfaces and agent output.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "extractor": "./extractor.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "audit:fixture": "node extractor.mjs audit tests/fixtures/slop.txt",
+    "audit:clean": "node extractor.mjs audit tests/fixtures/clean.txt",
+    "check": "node --check extractor.mjs && node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "anti-slop",
+    "humanizer",
+    "claude-code",
+    "codex",
+    "agent-skill",
+    "copywriting",
+    "ui-audit",
+    "design-review"
+  ]
+}

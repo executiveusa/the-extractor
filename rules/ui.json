@@ -1,0 +1,32 @@
+[
+  {
+    "id": "X-U01",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Gradient-as-default signal",
+    "pattern": "\\b(bg-gradient|linear-gradient|radial-gradient)\\b",
+    "why": "A gradient is not wrong; it needs a brand or information purpose rather than acting as instant 'premium' decoration.",
+    "action": "Keep only if it supports hierarchy, identity or information.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U02",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Rounded-card saturation signal",
+    "pattern": "\\b(rounded-(xl|2xl|3xl)|border-radius\\s*:\\s*(1[6-9]|[2-9][0-9])px)\\b",
+    "why": "Large rounded containers are a common default when agents need a section but have not solved hierarchy.",
+    "action": "Remove container chrome unless grouping genuinely needs a boundary.",
+    "maxMatches": 6
+  },
+  {
+    "id": "X-U03",
+    "category": "motion",
+    "severity": "low",
+    "label": "Generic reveal animation signal",
+    "pattern": "\\b(fade-up|fadeInUp|animate-pulse|floating|float-animation)\\b",
+    "why": "Repeated entrance motion can become decoration rather than explanation.",
+    "action": "Keep movement only when it clarifies sequence, state, causality or focus.",
+    "maxMatches": 6
+  }
+]

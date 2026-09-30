@@ -1,0 +1,15 @@
+{
+  "name": "the-extractor",
+  "description": "The Extractor plugin marketplace.",
+  "owner": {
+    "name": "executiveusa"
+  },
+  "plugins": [
+    {
+      "name": "the-extractor",
+      "source": "./",
+      "version": "0.1.0",
+      "description": "Delete what did not earn its place. Anti-slop audits for copy, UI and agent output."
+    }
+  ]
+}

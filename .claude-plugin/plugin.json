@@ -1,0 +1,13 @@
+{
+  "name": "the-extractor",
+  "displayName": "The Extractor",
+  "version": "0.1.0",
+  "description": "Destruction-first anti-slop audits for copy, interfaces and agent output. Delete before replacing; humanize only what survives.",
+  "author": {
+    "name": "executiveusa"
+  },
+  "repository": "https://github.com/executiveusa/the-extractor",
+  "license": "MIT",
+  "keywords": ["anti-slop", "humanizer", "reduction", "copywriting", "ui-audit", "agent-skills"],
+  "skills": ["./skills/"]
+}
