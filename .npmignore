@@ -1,0 +1,8 @@
+dist/
+tests/
+site/
+docs/
+examples/
+.github/
+.gitignore
+vercel.json

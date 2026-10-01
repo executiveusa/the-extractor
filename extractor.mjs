@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MAX_INPUT_BYTES = 2_000_000;
+// Context exclusion: ignore copy matches in prohibition sentences or quoted example text.
+const PROHIBITION_RX = /\b(do not|don't|dont|never|avoid|must not|mustn't|should not|shouldn't|stop (?:using|saying|writing)|banned|forbidden|no (?:more )?(?:use of)?)\b/i;
+const NAMED_ENTITIES = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", ndash: '\u2013', mdash: '\u2014', lsquo: '\u2018', rsquo: '\u2019', ldquo: '\u201c', rdquo: '\u201d', hellip: '\u2026', shy: '' };
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -35,7 +38,12 @@ if (!target) {
 
 const format = valueAfter('--format') || 'text';
 const strict = args.includes('--strict');
-const maxFindings = Number(valueAfter('--max-findings') || 40);
+const maxFindingsRaw = valueAfter('--max-findings');
+const maxFindings = maxFindingsRaw === null ? 40 : Number(maxFindingsRaw);
+if (!Number.isInteger(maxFindings) || maxFindings < 1 || !/^\d+$/.test(String(maxFindingsRaw ?? '40'))) {
+  console.error(`Invalid --max-findings: ${maxFindingsRaw}. Use a positive integer.`);
+  process.exit(2);
+}
 
 const raw = await readTarget(target);
 const content = looksLikeHtml(raw) ? htmlToText(raw) : raw;
@@ -101,7 +109,11 @@ function audit(content, rawSource, rules, { target, maxFindings }) {
     const rx = new RegExp(rule.pattern, rule.flags || 'gi');
     let match;
     let count = 0;
-    while ((match = rx.exec(haystack)) && findings.length < maxFindings) {
+    while ((match = rx.exec(haystack))) {
+      if (!['ui', 'motion', 'code'].includes(rule.category) && isExcludedContext(haystack, match.index, match[0].length)) {
+        if (!rx.global) break;
+        continue;
+      }
       count++;
       const start = Math.max(0, match.index - 60);
       const end = Math.min(haystack.length, match.index + match[0].length + 90);
@@ -125,13 +137,20 @@ function audit(content, rawSource, rules, { target, maxFindings }) {
   }
 
   findings.push(...structuralSignals(normalized));
-  const capped = findings.slice(0, maxFindings);
+  // Severity totals (and therefore --strict) cover ALL findings. The cap only limits what is displayed.
   const summary = {
-    high: capped.filter(f => f.severity === 'high').length,
-    medium: capped.filter(f => f.severity === 'medium').length,
-    low: capped.filter(f => f.severity === 'low').length,
-    total: capped.length
+    high: findings.filter(f => f.severity === 'high').length,
+    medium: findings.filter(f => f.severity === 'medium').length,
+    low: findings.filter(f => f.severity === 'low').length,
+    total: findings.length,
+    shown: Math.min(findings.length, maxFindings)
   };
+  const rank = { high: 0, medium: 1, low: 2 };
+  const capped = findings
+    .map((f, i) => [f, i])
+    .sort((a, b) => (rank[a[0].severity] ?? 3) - (rank[b[0].severity] ?? 3) || a[1] - b[1])
+    .map(x => x[0])
+    .slice(0, maxFindings);
 
   return {
     tool: 'The Extractor',
@@ -143,6 +162,21 @@ function audit(content, rawSource, rules, { target, maxFindings }) {
     reduction: buildReduction(capped),
     stopRule: 'Stop when another removal would make the human less successful.'
   };
+}
+
+// Context exclusion for copy rules: a match is ignored when it sits in a prohibition/negation
+// sentence ("Do not claim ... revolutionary") or inside quoted example text.
+function isExcludedContext(text, index, length) {
+  let start = index;
+  while (start > 0 && !/[.!?\n]/.test(text[start - 1])) start--;
+  let end = index + length;
+  while (end < text.length && !/[.!?\n]/.test(text[end])) end++;
+  const before = text.slice(start, index);
+  const after = text.slice(index + length, end);
+  if (PROHIBITION_RX.test(before)) return true;
+  const openers = (before.match(/["\u201c\u2018]/g) || []).length;
+  if (openers % 2 === 1 && /["\u201d\u2019]/.test(after)) return true;
+  return false;
 }
 
 function structuralSignals(text) {
@@ -184,7 +218,7 @@ function renderText(report) {
   lines.push('Destruction-first anti-slop audit');
   lines.push('');
   lines.push(`Target: ${report.target}`);
-  lines.push(`Signals: ${report.summary.total}  high:${report.summary.high} medium:${report.summary.medium} low:${report.summary.low}`);
+  lines.push(`Signals: ${report.summary.total}${report.summary.shown < report.summary.total ? ` (showing ${report.summary.shown})` : ""}  high:${report.summary.high} medium:${report.summary.medium} low:${report.summary.low}`);
   lines.push(`Provenance: ${report.provenance}`);
   lines.push('');
   for (const f of report.findings) {
@@ -210,20 +244,32 @@ function looksLikeHtml(text) {
 }
 
 function htmlToText(html) {
-  return html
+  const text = html
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
     .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_, n, inner) => `\n${'#'.repeat(Math.min(Number(n), 3))} ${inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}\n`)
+    .replace(/<a\b[^>]*?href\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi, (_, _q, d, sq, u, inner) => {
+      const label = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || 'link';
+      return `[${label.replace(/[\[\]]/g, '')}](${(d ?? sq ?? u ?? '').replace(/[()\s]/g, '')})`;
+    })
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|section|article|header|footer|nav|li|h1|h2|h3|h4)>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
     .replace(/\n\s*\n\s*\n/g, '\n\n')
     .replace(/[ \t]+/g, ' ')
     .trim();
+  return decodeEntities(text);
+}
+
+// Single pass, so "&amp;#97;" decodes to "&#97;" and not to "a".
+function decodeEntities(s) {
+  return s.replace(/&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z][a-zA-Z0-9]*));/g, (m, dec, hex, name) => {
+    if (name) return Object.hasOwn(NAMED_ENTITIES, name.toLowerCase()) ? NAMED_ENTITIES[name.toLowerCase()] : m;
+    const cp = dec !== undefined ? Number(dec) : parseInt(hex, 16);
+    if (!Number.isInteger(cp) || cp < 0 || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return m;
+    return String.fromCodePoint(cp);
+  });
 }
 
 function oneLine(s) { return s.replace(/\s+/g, ' ').trim().slice(0, 240); }
