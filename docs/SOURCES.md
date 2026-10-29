@@ -12,7 +12,7 @@ The Extractor is an original orchestration and reduction method. It does **not**
 | `hardikpandya/stop-slop` | aggressive prose editing reference | MIT | Useful signal, not permission to flatten voice. |
 | `harshaneel/humanize` | research-grounded humanization / ai-check reference | MIT | Useful literature map; detector outputs are not provenance. |
 | `kjmagnan1s/anti-slop` | protect-list and maintained prose-floor reference | MIT | Strong “protect real voice” principle. |
-| `miqdadbadjuber/anti-slop` | UI/copy/code filter and packaging reference | MIT | Separate project from `Leonxlnx/taste-skill`; do not conflate them. |
+| `miqdadbadjuber/anti-slop` | UI/copy/code filter and packaging reference | MIT | Separate project from `Leonxlnx/taste-skill`; do not conflate them. Re-read 2026-10-28 at `3005235` (MIT, (c) 2026 Miqdad Badjuber). Rules X-U04..X-U12 and X-C09..X-C10 are original patterns inspired by its checks (glass blur, glow, default gradient pairs, dead controls, alt/lang/zoom, focus outline, sparkle icons, AI buzzwords, unsourced stats). No text, rule wording or skill files are copied. Its judgment rules (direction, purpose, hierarchy, contrast, keyboard use, performance) stay advisory: a regex cannot verify them. |
 | `gabelul/slopbuster` | prose/code pattern catalogue | MIT | Pattern library reference. |
 | `dmmulroy/anti-slop` | TypeScript/JavaScript low-evidence linting | MIT | Code-specific; not a prose tool. |
 | `Aboudjem/humanizer-skill` | multi-target packaging / local text audit reference | MIT | Useful distribution patterns. |
