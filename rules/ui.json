@@ -74,7 +74,7 @@
     "category": "ui",
     "severity": "medium",
     "label": "Image without alt attribute",
-    "pattern": "<img\\b(?![^>]*\\balt\\s*=)[^>]*>",
+    "pattern": "<img\\b(?![^>]*\\salt\\s*=)[^>]*>",
     "why": "Without an alt attribute a screen reader may read the file name.",
     "action": "Add a descriptive alt, or alt=\"\" if the image is decorative.",
     "maxMatches": 4
@@ -94,7 +94,7 @@
     "category": "ui",
     "severity": "medium",
     "label": "Zoom blocked in viewport meta",
-    "pattern": "<meta\\b[^>]*name\\s*=\\s*[\"\\']viewport[\"\\'][^>]*(user-scalable\\s*=\\s*(no|0)|maximum-scale\\s*=\\s*1(\\.0)?\\b)",
+    "pattern": "<meta\\b(?=[^>]*\\bname\\s*=\\s*[\\\"']viewport[\\\"'])[^>]*(user-scalable\\s*=\\s*(no|0)|maximum-scale\\s*=\\s*1(\\.0)?\\b)",
     "why": "Blocking pinch zoom stops low-vision users from enlarging the page.",
     "action": "Remove user-scalable=no and maximum-scale=1.",
     "maxMatches": 1

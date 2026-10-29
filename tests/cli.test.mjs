@@ -119,3 +119,37 @@ test('existing fixtures keep their original findings (regression)', () => {
   const report = JSON.parse(run('tests/fixtures/slop.txt').stdout);
   for (const id of ['X-C01','X-C02']) assert.ok(report.findings.some(f => f.id === id));
 });
+
+// review fixes 1-4
+test('decimal points are not sentence boundaries for prohibition context', () => {
+  const ids = JSON.parse(runStdin('Never write 99.9% uptime or AI-powered without a source.').stdout).findings.map(f => f.id);
+  assert.ok(!ids.includes('X-C09'));
+  assert.ok(!ids.includes('X-C10'));
+  const live = JSON.parse(runStdin('We promise 99.9% uptime. Really.').stdout).findings.map(f => f.id);
+  assert.ok(live.includes('X-C10'));
+});
+
+test('UI source rules ignore HTML comments but still see live markup', () => {
+  const commented = '<!doctype html><html lang="en"><body><!-- <div onclick="x()">old</div> <img src="a.png"> --><p>Hi</p></body></html>';
+  const ids = JSON.parse(runStdin(commented).stdout).findings.map(f => f.id);
+  assert.ok(!ids.includes('X-U07'));
+  assert.ok(!ids.includes('X-U08'));
+  const live = '<!doctype html><html lang="en"><body><!-- note --><div onclick="x()">go</div></body></html>';
+  assert.ok(JSON.parse(runStdin(live).stdout).findings.some(f => f.id === 'X-U07'));
+});
+
+test('viewport zoom rule is attribute-order independent', () => {
+  for (const meta of ['<meta content="width=device-width, user-scalable=no" name="viewport">', '<meta name="viewport" content="width=device-width, user-scalable=no">']) {
+    const html = `<!doctype html><html lang="en"><head>${meta}</head><body><p>x</p></body></html>`;
+    assert.ok(JSON.parse(runStdin(html).stdout).findings.some(f => f.id === 'X-U10'), meta);
+  }
+  const ok = '<!doctype html><html lang="en"><head><meta content="width=device-width, initial-scale=1" name="viewport"></head><body><p>x</p></body></html>';
+  assert.ok(!JSON.parse(runStdin(ok).stdout).findings.some(f => f.id === 'X-U10'));
+});
+
+test('data-alt is not a real alt attribute, alt is', () => {
+  const bad = '<!doctype html><html lang="en"><body><img src="a.png" data-alt="x"></body></html>';
+  assert.ok(JSON.parse(runStdin(bad).stdout).findings.some(f => f.id === 'X-U08'));
+  const good = '<!doctype html><html lang="en"><body><img src="a.png" alt="A chart"><img src="b.png" ALT = "B"></body></html>';
+  assert.ok(!JSON.parse(runStdin(good).stdout).findings.some(f => f.id === 'X-U08'));
+});

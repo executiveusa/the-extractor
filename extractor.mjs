@@ -101,7 +101,8 @@ async function loadRules() {
 
 function audit(content, rawSource, rules, { target, maxFindings }) {
   const normalized = content.replace(/\r\n/g, '\n');
-  const sourceNormalized = rawSource.replace(/\r\n/g, '\n');
+  // HTML comments are not rendered; blank them (same length, so offsets hold) before UI source rules run.
+  const sourceNormalized = rawSource.replace(/\r\n/g, '\n').replace(/<!--[\s\S]*?-->/g, m => m.replace(/[^\n]/g, ' '));
   const findings = [];
 
   for (const rule of rules) {
@@ -166,11 +167,18 @@ function audit(content, rawSource, rules, { target, maxFindings }) {
 
 // Context exclusion for copy rules: a match is ignored when it sits in a prohibition/negation
 // sentence ("Do not claim ... revolutionary") or inside quoted example text.
+// A period between two digits (99.9, 3.14) is a decimal point, not a sentence end.
+function isSentenceBoundary(text, i) {
+  const c = text[i];
+  if (c === '.') return !(/\d/.test(text[i - 1] || '') && /\d/.test(text[i + 1] || ''));
+  return c === '!' || c === '?' || c === '\n';
+}
+
 function isExcludedContext(text, index, length) {
   let start = index;
-  while (start > 0 && !/[.!?\n]/.test(text[start - 1])) start--;
+  while (start > 0 && !isSentenceBoundary(text, start - 1)) start--;
   let end = index + length;
-  while (end < text.length && !/[.!?\n]/.test(text[end])) end++;
+  while (end < text.length && !isSentenceBoundary(text, end)) end++;
   const before = text.slice(start, index);
   const after = text.slice(index + length, end);
   if (PROHIBITION_RX.test(before)) return true;
