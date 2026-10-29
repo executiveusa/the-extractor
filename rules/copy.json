@@ -78,5 +78,25 @@
     "why": "Generic CTA labels make the reader infer what happens after the click.",
     "action": "Use the actual action: book, compare, see pricing, read treatment details, or request an audit.",
     "maxMatches": 8
+  },
+  {
+    "id": "X-C09",
+    "category": "copy",
+    "severity": "medium",
+    "label": "AI-label buzzword",
+    "pattern": "\\b(ai[- ]powered|next[- ]generation|next[- ]gen)\\b",
+    "why": "The label names the technology, not what the reader gets.",
+    "action": "Say what it does and for whom.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-C10",
+    "category": "copy",
+    "severity": "medium",
+    "label": "Round statistic needs source check",
+    "pattern": "\\b(\\d{1,3}(\\.\\d)?K\\+\\s+(users|customers|teams|downloads)|99\\.9\\s?%\\s+uptime|trusted by (thousands|millions))\\b",
+    "why": "A round figure is a pattern, not proof of anything. This rule cannot tell whether a source exists elsewhere on the page.",
+    "action": "Confirm there is a cited source and date for this figure; if there is none, remove it.",
+    "maxMatches": 3
   }
 ]

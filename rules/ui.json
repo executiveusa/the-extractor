@@ -28,5 +28,95 @@
     "why": "Repeated entrance motion can become decoration rather than explanation.",
     "action": "Keep movement only when it clarifies sequence, state, causality or focus.",
     "maxMatches": 6
+  },
+  {
+    "id": "X-U04",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Glass blur surface signal",
+    "pattern": "\\b(backdrop-blur(-[a-z0-9]+)?|backdrop-filter\\s*:\\s*blur)",
+    "why": "One blurred surface can be a choice. Several at once is a common default look.",
+    "action": "Keep it for one surface that needs depth from content behind it. Otherwise use a solid fill.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U05",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Colored glow shadow signal",
+    "pattern": "(\\bshadow-(blue|purple|indigo|violet|cyan|pink|fuchsia)-\\d{2,3}\\b|box-shadow\\s*:\\s*0\\s+0\\s+\\d{2,3}px)",
+    "why": "A colored glow on many components adds decoration, not hierarchy.",
+    "action": "Keep a glow only with a written reason; otherwise use a neutral shadow or none.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U06",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Default blue/purple gradient pair",
+    "pattern": "\\bfrom-(blue|indigo|violet|purple)-\\d{2,3}\\s+(via-[a-z]+-\\d{2,3}\\s+)?to-(purple|pink|cyan|fuchsia|indigo)-\\d{2,3}\\b",
+    "why": "These pairs are the most common agent default for brand color.",
+    "action": "Use the project palette, or state why this pair is the brand.",
+    "maxMatches": 3
+  },
+  {
+    "id": "X-U07",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Clickable non-control element",
+    "pattern": "<(div|span)\\b[^>]*\\bonclick\\s*=",
+    "why": "A div or span with a click handler has no role, focus or keyboard action by default.",
+    "action": "Use <button> for actions or <a href> for navigation.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U08",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Image without alt attribute",
+    "pattern": "<img\\b(?![^>]*\\balt\\s*=)[^>]*>",
+    "why": "Without an alt attribute a screen reader may read the file name.",
+    "action": "Add a descriptive alt, or alt=\"\" if the image is decorative.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U09",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Document without lang attribute",
+    "pattern": "<html\\b(?![^>]*\\blang\\s*=)[^>]*>",
+    "why": "Screen readers and translation tools use lang to choose pronunciation and language.",
+    "action": "Add lang to the html element.",
+    "maxMatches": 1
+  },
+  {
+    "id": "X-U10",
+    "category": "ui",
+    "severity": "medium",
+    "label": "Zoom blocked in viewport meta",
+    "pattern": "<meta\\b[^>]*name\\s*=\\s*[\"\\']viewport[\"\\'][^>]*(user-scalable\\s*=\\s*(no|0)|maximum-scale\\s*=\\s*1(\\.0)?\\b)",
+    "why": "Blocking pinch zoom stops low-vision users from enlarging the page.",
+    "action": "Remove user-scalable=no and maximum-scale=1.",
+    "maxMatches": 1
+  },
+  {
+    "id": "X-U11",
+    "category": "ui",
+    "severity": "low",
+    "label": "Focus outline removed signal",
+    "pattern": "(\\boutline\\s*:\\s*(none|0)\\b|\\bfocus:outline-none\\b)",
+    "why": "Removing the outline is fine only if a visible focus style replaces it. This rule cannot tell whether one does.",
+    "action": "Check by tabbing through the page that every control shows focus.",
+    "maxMatches": 4
+  },
+  {
+    "id": "X-U12",
+    "category": "ui",
+    "severity": "low",
+    "label": "Sparkle icon or emoji signal",
+    "pattern": "(✨|\\bsparkles?\\b)",
+    "why": "Sparkle marks are a common stand-in for \"AI feature\" without saying what the feature does.",
+    "action": "Replace with an icon or words that match what the control does.",
+    "maxMatches": 3
   }
 ]
